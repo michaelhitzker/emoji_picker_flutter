@@ -4,6 +4,15 @@
 /// Emoji Version
 const int version = 1;
 
+/// Map of all possible emojis along with their names in [Category.CUSTOM]
+final Map<String, String> custom = Map.fromIterables([
+  ':homyLol:',
+  ':kekW:'
+], [
+  'https://static-cdn.jtvnw.net/emoticons/v1/1840542/1.0',
+  'https://static-cdn.jtvnw.net/emoticons/v1/305010854/1.0'
+]);
+
 /// Map of all possible emojis along with their names in [Category.SMILEYS]
 final Map<String, String> smileys = Map.fromIterables([
   'Grinning Face',

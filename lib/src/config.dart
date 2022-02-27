@@ -24,6 +24,7 @@ class Config {
       this.enableSkinTones = true,
       this.showRecentsTab = true,
       this.recentsLimit = 28,
+      this.customEmojisEnabled = false,
       this.noRecentsText = 'No Recents',
       this.noRecentsStyle =
           const TextStyle(fontSize: 20, color: Colors.black26),
@@ -96,6 +97,9 @@ class Config {
   /// Change between Material and Cupertino button style
   final ButtonMode buttonMode;
 
+  ///Enable custom emojis
+  final bool customEmojisEnabled;
+
   /// Get Emoji size based on properties and screen width
   double getEmojiSize(double width) {
     final maxSize = width / columns;
@@ -107,6 +111,8 @@ class Config {
     switch (category) {
       case Category.RECENT:
         return categoryIcons.recentIcon;
+      case Category.CUSTOM:
+        return categoryIcons.customIcon;
       case Category.SMILEYS:
         return categoryIcons.smileyIcon;
       case Category.ANIMALS:

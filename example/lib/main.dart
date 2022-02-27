@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   runApp(MyApp());
@@ -19,7 +20,7 @@ class _MyAppState extends State<MyApp> {
 
   _onEmojiSelected(Emoji emoji) {
     _controller
-      ..text += emoji.emoji
+      ..text += emoji.textEmoji
       ..selection = TextSelection.fromPosition(
           TextPosition(offset: _controller.text.length));
   }
@@ -86,8 +87,9 @@ class _MyAppState extends State<MyApp> {
                     Material(
                       color: Colors.transparent,
                       child: IconButton(
-                          onPressed: () {
-                            // send message
+                          onPressed: () async {
+                            final prefs = await SharedPreferences.getInstance();
+                            await prefs.clear();
                           },
                           icon: const Icon(
                             Icons.send,

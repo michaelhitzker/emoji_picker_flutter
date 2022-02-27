@@ -66,6 +66,7 @@ class EmojiPickerInternalUtils {
   /// Returns map of all the available category emojis
   Future<Map<Category, Map<String, String>>> getAvailableCategoryEmoji() async {
     final allCategoryEmoji = Map.fromIterables([
+      Category.CUSTOM,
       Category.SMILEYS,
       Category.ANIMALS,
       Category.FOODS,
@@ -75,6 +76,7 @@ class EmojiPickerInternalUtils {
       Category.SYMBOLS,
       Category.FLAGS
     ], [
+      emoji_list.custom,
       emoji_list.smileys,
       emoji_list.animals,
       emoji_list.foods,
@@ -190,5 +192,32 @@ class EmojiPickerInternalUtils {
         '',
       ),
     );
+  }
+
+  static bool _isEnumItem(enumItem) {
+    final split_enum = enumItem.toString().split('.');
+    return split_enum.length > 1 &&
+        split_enum[0] == enumItem.runtimeType.toString();
+  }
+
+  static T? fromString<T>(List<T> enumValues, String value,
+      {bool camelCase = false}) {
+    try {
+      return enumValues.singleWhere((enumItem) =>
+          EmojiPickerInternalUtils.convertToString(enumItem,
+                  camelCase: camelCase)
+              .toLowerCase() ==
+          value.toLowerCase());
+    } on StateError catch (_) {
+      return null;
+    }
+  }
+
+  static String convertToString(dynamic enumItem, {bool camelCase = false}) {
+    assert(enumItem != null);
+    assert(_isEnumItem(enumItem),
+        '$enumItem of type ${enumItem.runtimeType.toString()} is not an enum item');
+    final _tmp = enumItem.toString().split('.')[1];
+    return _tmp;
   }
 }

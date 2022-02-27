@@ -10,6 +10,7 @@ class CategoryIcons {
   /// Constructor
   const CategoryIcons({
     this.recentIcon = Icons.access_time,
+    this.customIcon = Icons.layers_rounded,
     this.smileyIcon = Icons.tag_faces,
     this.animalIcon = Icons.pets,
     this.foodIcon = Icons.fastfood,
@@ -23,7 +24,10 @@ class CategoryIcons {
   /// Icon for [Category.RECENT]
   final IconData recentIcon;
 
-  /// Icon for [Category.SMILEYS]
+  /// Icon for [Category.CUSTOM]
+  final IconData customIcon;
+
+  /// Icon for [Category.SMILEY]
   final IconData smileyIcon;
 
   /// Icon for [Category.ANIMALS]

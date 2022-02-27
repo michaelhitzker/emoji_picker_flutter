@@ -32,8 +32,13 @@ class EmojiPickerUtils {
 
       // Set all the emoji entities
       availableCategoryEmoji.forEach((_, emojis) {
-        final emojiEntities =
-            emojis.entries.map((emoji) => Emoji(emoji.key, emoji.value));
+        final emojiEntities = emojis.entries.map((emoji) {
+          final type = EmojiTypeExtensions.fromValue(emoji.value);
+          if (type == null) {
+            return null;
+          }
+          return Emoji(emoji.key, type, emoji.value);
+        }).whereType<Emoji>();
         _allAvailableEmojiEntities.addAll(emojiEntities);
       });
     }

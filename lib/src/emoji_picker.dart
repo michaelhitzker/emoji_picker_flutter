@@ -14,6 +14,9 @@ enum Category {
   /// Recent emojis
   RECENT,
 
+  /// Custom emojis
+  CUSTOM,
+
   /// Smiley emojis
   SMILEYS,
 
@@ -46,6 +49,8 @@ extension CategoryExtension on Category {
     switch (this) {
       case Category.RECENT:
         return 'recent';
+      case Category.CUSTOM:
+        return 'custom';
       case Category.SMILEYS:
         return 'smileys';
       case Category.ANIMALS:
@@ -223,15 +228,22 @@ class EmojiPickerState extends State<EmojiPicker> {
       _categoryEmoji.add(
         CategoryEmoji(
             category,
-            emojis.entries.map((emoji) {
-              var _emoji = Emoji(emoji.key, emoji.value);
-              // Emoji with skin tone are only in SMILEY & ACTIVITIES category
-              if (category == Category.SMILEYS ||
-                  category == Category.ACTIVITIES) {
-                return _updateSkinToneSupport(_emoji);
-              } else
-                return _emoji;
-            }).toList()),
+            emojis.entries
+                .map((emoji) {
+                  final type = EmojiTypeExtensions.fromValue(emoji.value);
+                  if (type == null) {
+                    return null;
+                  }
+                  var _emoji = Emoji(emoji.key, type, emoji.value);
+                  // Emoji with skin tone are only in SMILEY & ACTIVITIES category
+                  if (category == Category.SMILEYS ||
+                      category == Category.ACTIVITIES) {
+                    return _updateSkinToneSupport(_emoji);
+                  } else
+                    return _emoji;
+                })
+                .whereType<Emoji>()
+                .toList()),
       );
     });
 

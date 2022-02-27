@@ -226,16 +226,38 @@ class _DefaultEmojiPickerViewState extends State<DefaultEmojiPickerView>
                 ),
               )
             : Container(),
-        Text(
+        _buildEmojiIcon(emoji, emojiSize)
+      ]),
+    );
+  }
+
+  Widget _buildEmojiIcon(
+    Emoji emoji,
+    double emojiSize,
+  ) {
+    switch (emoji.type) {
+      case EmojiType.UNICODE:
+        return Text(
           emoji.emoji,
           textScaleFactor: 1.0,
           style: TextStyle(
             fontSize: emojiSize,
             backgroundColor: Colors.transparent,
           ),
-        ),
-      ]),
-    );
+        );
+      case EmojiType.IMAGE:
+        return Image.asset(
+          emoji.emoji,
+          height: emojiSize,
+          width: emojiSize,
+        );
+      case EmojiType.URL:
+        return Image.network(
+          emoji.emoji,
+          height: emojiSize,
+          width: emojiSize,
+        );
+    }
   }
 
   /// Build different Button based on ButtonMode
