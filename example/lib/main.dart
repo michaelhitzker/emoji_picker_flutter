@@ -130,7 +130,14 @@ class _MyAppState extends State<MyApp> {
                             fontSize: 20, color: Colors.black26),
                         tabIndicatorAnimDuration: kTabScrollDuration,
                         categoryIcons: const CategoryIcons(),
-                        buttonMode: ButtonMode.MATERIAL)),
+                        buttonMode: ButtonMode.MATERIAL,
+                        customEmojis: Map.fromIterables([
+                          ':homyLol:',
+                          ':kekW:'
+                        ], [
+                          'https://static-cdn.jtvnw.net/emoticons/v1/1840542/1.0',
+                          'https://static-cdn.jtvnw.net/emoticons/v1/305010854/1.0'
+                        ]))),
               ),
             ),
           ],

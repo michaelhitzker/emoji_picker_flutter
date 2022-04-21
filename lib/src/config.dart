@@ -24,7 +24,7 @@ class Config {
       this.enableSkinTones = true,
       this.showRecentsTab = true,
       this.recentsLimit = 28,
-      this.customEmojisEnabled = false,
+      this.customEmojis = const {},
       this.noRecentsText = 'No Recents',
       this.noRecentsStyle =
           const TextStyle(fontSize: 20, color: Colors.black26),
@@ -97,8 +97,8 @@ class Config {
   /// Change between Material and Cupertino button style
   final ButtonMode buttonMode;
 
-  ///Enable custom emojis
-  final bool customEmojisEnabled;
+  ///Custom emojis
+  final Map<String, String> customEmojis;
 
   /// Get Emoji size based on properties and screen width
   double getEmojiSize(double width) {

@@ -55,7 +55,7 @@ class EmojiPickerInternalUtils {
       // Check if emoji is available on this platform
       newMap = await _getPlatformAvailableEmoji(map);
       // Save available Emojis to local storage for faster loading next time
-      if (newMap != null) {
+      if (newMap != null && title != Category.CUSTOM.name) {
         await _cacheFilteredEmojis(title, newMap);
       }
     }
@@ -64,9 +64,10 @@ class EmojiPickerInternalUtils {
   }
 
   /// Returns map of all the available category emojis
-  Future<Map<Category, Map<String, String>>> getAvailableCategoryEmoji() async {
+  Future<Map<Category, Map<String, String>>> getAvailableCategoryEmoji(
+      {required Map<String, String> customEmojis}) async {
     final allCategoryEmoji = Map.fromIterables([
-      Category.CUSTOM,
+      if (customEmojis.isNotEmpty) Category.CUSTOM,
       Category.SMILEYS,
       Category.ANIMALS,
       Category.FOODS,
@@ -76,7 +77,7 @@ class EmojiPickerInternalUtils {
       Category.SYMBOLS,
       Category.FLAGS
     ], [
-      emoji_list.custom,
+      if (customEmojis.isNotEmpty) customEmojis,
       emoji_list.smileys,
       emoji_list.animals,
       emoji_list.foods,

@@ -221,8 +221,8 @@ class EmojiPickerState extends State<EmojiPicker> {
       _categoryEmoji.add(CategoryEmoji(Category.RECENT, recentEmojiMap));
     }
 
-    final availableCategoryEmoji =
-        await _emojiPickerInternalUtils.getAvailableCategoryEmoji();
+    final availableCategoryEmoji = await _emojiPickerInternalUtils
+        .getAvailableCategoryEmoji(customEmojis: widget.config.customEmojis);
 
     availableCategoryEmoji.forEach((category, emojis) async {
       _categoryEmoji.add(

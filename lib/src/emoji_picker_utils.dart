@@ -21,14 +21,15 @@ class EmojiPickerUtils {
   }
 
   /// Search for related emoticons based on keywords
-  Future<List<Emoji>> searchEmoji(String keyword) async {
+  Future<List<Emoji>> searchEmoji(
+      String keyword, Map<String, String> customEmojis) async {
     if (keyword.isEmpty) return [];
 
     if (_allAvailableEmojiEntities.isEmpty) {
       final emojiPickerInternalUtils = EmojiPickerInternalUtils();
 
-      final availableCategoryEmoji =
-          await emojiPickerInternalUtils.getAvailableCategoryEmoji();
+      final availableCategoryEmoji = await emojiPickerInternalUtils
+          .getAvailableCategoryEmoji(customEmojis: customEmojis);
 
       // Set all the emoji entities
       availableCategoryEmoji.forEach((_, emojis) {
