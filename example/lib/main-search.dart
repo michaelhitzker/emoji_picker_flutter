@@ -105,10 +105,11 @@ class _MyAppState extends State<MyApp> {
         left: left,
         top: top,
         child: Material(
+          borderRadius: _config.skinToneDialogDecoration.borderRadius,
           elevation: 4.0,
           child: EmojiContainer(
             padding: const EdgeInsets.symmetric(vertical: 4.0),
-            color: _config.skinToneDialogBgColor,
+            decoration: _config.skinToneDialogDecoration,
             buttonMode: _config.buttonMode,
             child: Row(
               children: [

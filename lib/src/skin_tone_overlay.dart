@@ -38,9 +38,10 @@ mixin SkinToneOverlayStateMixin<T extends StatefulWidget> on State<T> {
         top: positionRect.top,
         child: Material(
           elevation: 4.0,
+          borderRadius: config.skinToneDialogDecoration.borderRadius,
           child: Container(
             padding: const EdgeInsets.symmetric(vertical: 4.0),
-            color: config.skinToneDialogBgColor,
+            decoration: config.skinToneDialogDecoration,
             child: Row(
               children: [
                 _buildSkinToneEmoji(

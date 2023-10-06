@@ -116,7 +116,8 @@ class _MyAppState extends State<MyApp> {
                       iconColor: Colors.grey,
                       iconColorSelected: Colors.blue,
                       backspaceColor: Colors.blue,
-                      skinToneDialogBgColor: Colors.white,
+                      skinToneDialogDecoration:
+                          const BoxDecoration(color: Colors.white),
                       skinToneIndicatorColor: Colors.grey,
                       enableSkinTones: true,
                       recentTabBehavior: RecentTabBehavior.RECENT,

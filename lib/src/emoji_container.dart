@@ -9,14 +9,18 @@ import 'package:flutter/material.dart';
 class EmojiContainer extends StatelessWidget {
   /// Constructor
   const EmojiContainer({
-    required this.color,
+    this.color,
     required this.buttonMode,
     this.padding,
+    this.decoration,
     required this.child,
   });
 
   /// Background color for container
-  final Color color;
+  final Color? color;
+
+  /// BoxDecoration color for container
+  final BoxDecoration? decoration;
 
   /// Button mode that affects the type of container
   final ButtonMode buttonMode;
@@ -29,6 +33,10 @@ class EmojiContainer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorNotNull = color != null;
+    final decorationNotNull = decoration != null;
+    assert((decorationNotNull || colorNotNull) &&
+        colorNotNull != decorationNotNull);
     if (buttonMode == ButtonMode.MATERIAL) {
       return Material(
         color: color,
@@ -42,6 +50,7 @@ class EmojiContainer extends StatelessWidget {
     } else {
       return Container(
         color: color,
+        decoration: decoration,
         padding: padding,
         child: child,
       );

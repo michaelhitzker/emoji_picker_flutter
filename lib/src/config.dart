@@ -28,7 +28,7 @@ class Config {
     this.iconColor = Colors.grey,
     this.iconColorSelected = Colors.blue,
     this.backspaceColor = Colors.blue,
-    this.skinToneDialogBgColor = Colors.white,
+    this.skinToneDialogDecoration = const BoxDecoration(color: Colors.white),
     this.skinToneIndicatorColor = Colors.grey,
     this.enableSkinTones = true,
     this.recentTabBehavior = RecentTabBehavior.RECENT,
@@ -77,7 +77,7 @@ class Config {
   final Color backspaceColor;
 
   /// The background color of the skin tone dialog
-  final Color skinToneDialogBgColor;
+  final BoxDecoration skinToneDialogDecoration;
 
   /// Color of the small triangle next to multiple skin tone emoji
   final Color skinToneIndicatorColor;
@@ -171,7 +171,7 @@ class Config {
         other.iconColor == iconColor &&
         other.iconColorSelected == iconColorSelected &&
         other.backspaceColor == backspaceColor &&
-        other.skinToneDialogBgColor == skinToneDialogBgColor &&
+        other.skinToneDialogDecoration == skinToneDialogDecoration &&
         other.skinToneIndicatorColor == skinToneIndicatorColor &&
         other.enableSkinTones == enableSkinTones &&
         other.recentTabBehavior == recentTabBehavior &&
@@ -200,7 +200,7 @@ class Config {
       iconColor.hashCode ^
       iconColorSelected.hashCode ^
       backspaceColor.hashCode ^
-      skinToneDialogBgColor.hashCode ^
+      skinToneDialogDecoration.hashCode ^
       skinToneIndicatorColor.hashCode ^
       enableSkinTones.hashCode ^
       recentTabBehavior.hashCode ^
