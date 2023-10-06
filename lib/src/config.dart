@@ -1,36 +1,48 @@
 import 'dart:math';
 
+import 'package:emoji_picker_flutter/src/category_emoji.dart';
 import 'package:emoji_picker_flutter/src/category_icons.dart';
 import 'package:emoji_picker_flutter/src/emoji_picker.dart';
+import 'package:emoji_picker_flutter/src/recent_tab_behavior.dart';
 import 'package:flutter/material.dart';
+
+/// Default Widget if no recent is available
+const DefaultNoRecentsWidget = Text(
+  'No Recents',
+  style: TextStyle(fontSize: 20, color: Colors.black26),
+  textAlign: TextAlign.center,
+);
 
 /// Config for customizations
 class Config {
   /// Constructor
-  const Config(
-      {this.columns = 7,
-      this.emojiSizeMax = 32.0,
-      this.verticalSpacing = 0,
-      this.horizontalSpacing = 0,
-      this.initCategory = Category.RECENT,
-      this.bgColor = const Color(0xFFEBEFF2),
-      this.indicatorColor = Colors.blue,
-      this.iconColor = Colors.grey,
-      this.iconColorSelected = Colors.blue,
-      this.progressIndicatorColor = Colors.blue,
-      this.backspaceColor = Colors.blue,
-      this.skinToneDialogBgColor = Colors.white,
-      this.skinToneIndicatorColor = Colors.grey,
-      this.enableSkinTones = true,
-      this.showRecentsTab = true,
-      this.recentsLimit = 28,
-      this.customEmojis = const {},
-      this.noRecentsText = 'No Recents',
-      this.noRecentsStyle =
-          const TextStyle(fontSize: 20, color: Colors.black26),
-      this.tabIndicatorAnimDuration = kTabScrollDuration,
-      this.categoryIcons = const CategoryIcons(),
-      this.buttonMode = ButtonMode.MATERIAL});
+  const Config({
+    this.columns = 7,
+    this.emojiSizeMax = 32.0,
+    this.verticalSpacing = 0,
+    this.horizontalSpacing = 0,
+    this.gridPadding = EdgeInsets.zero,
+    this.initCategory = Category.RECENT,
+    this.bgColor = const Color(0xFFEBEFF2),
+    this.indicatorColor = Colors.blue,
+    this.iconColor = Colors.grey,
+    this.iconColorSelected = Colors.blue,
+    this.backspaceColor = Colors.blue,
+    this.skinToneDialogBgColor = Colors.white,
+    this.skinToneIndicatorColor = Colors.grey,
+    this.enableSkinTones = true,
+    this.recentTabBehavior = RecentTabBehavior.RECENT,
+    this.recentsLimit = 28,
+    this.replaceEmojiOnLimitExceed = false,
+    this.noRecents = DefaultNoRecentsWidget,
+    this.loadingIndicator = const SizedBox.shrink(),
+    this.tabIndicatorAnimDuration = kTabScrollDuration,
+    this.categoryIcons = const CategoryIcons(),
+    this.buttonMode = ButtonMode.MATERIAL,
+    this.checkPlatformCompatibility = true,
+    this.emojiSet,
+    this.emojiTextStyle,
+  });
 
   /// Number of emojis per row
   final int columns;
@@ -61,9 +73,6 @@ class Config {
   /// The color of the category icon when selected
   final Color iconColorSelected;
 
-  /// The color of the loading indicator during initalization
-  final Color progressIndicatorColor;
-
   /// The color of the backspace icon button
   final Color backspaceColor;
 
@@ -76,17 +85,17 @@ class Config {
   /// Enable feature to select a skin tone of certain emoji's
   final bool enableSkinTones;
 
-  /// Show extra tab with recently used emoji
-  final bool showRecentsTab;
+  /// Behavior of Recent Tab (Recent, Popular)
+  final RecentTabBehavior recentTabBehavior;
 
   /// Limit of recently used emoji that will be saved
   final int recentsLimit;
 
-  /// The text to be displayed if no recent emojis to display
-  final String noRecentsText;
+  /// A widget (usually [Text]) to be displayed if no recent emojis to display
+  final Widget noRecents;
 
-  /// The text style for [noRecentsText]
-  final TextStyle noRecentsStyle;
+  /// A widget to display while emoji picker is initializing
+  final Widget loadingIndicator;
 
   /// Duration of tab indicator to animate to next category
   final Duration tabIndicatorAnimDuration;
@@ -94,11 +103,28 @@ class Config {
   /// Determines the icon to display for each [Category]
   final CategoryIcons categoryIcons;
 
-  /// Change between Material and Cupertino button style
+  /// Choose visual response for tapping on an emoji cell
   final ButtonMode buttonMode;
 
-  ///Custom emojis
-  final Map<String, String> customEmojis;
+  /// The padding of GridView, default is [EdgeInsets.zero]
+  final EdgeInsets gridPadding;
+
+  /// Replace latest emoji on recents list on limit exceed
+  final bool replaceEmojiOnLimitExceed;
+
+  /// Verify that emoji glyph is supported by the platform (Android only)
+  final bool checkPlatformCompatibility;
+
+  /// Custom emojis; if set, overrides default emojis provided by the library
+  final List<CategoryEmoji>? emojiSet;
+
+  /// Custom emoji text style to apply to emoji characters in the grid
+  ///
+  /// If you define a custom fontFamily or use GoogleFonts to set this property
+  /// be sure to set [checkPlatformCompatibility] to false. It will improve
+  /// initalization performance and prevent technically supported glyphs from
+  /// being filtered out.
+  final TextStyle? emojiTextStyle;
 
   /// Get Emoji size based on properties and screen width
   double getEmojiSize(double width) {
@@ -111,8 +137,6 @@ class Config {
     switch (category) {
       case Category.RECENT:
         return categoryIcons.recentIcon;
-      case Category.CUSTOM:
-        return categoryIcons.customIcon;
       case Category.SMILEYS:
         return categoryIcons.smileyIcon;
       case Category.ANIMALS:
@@ -146,18 +170,22 @@ class Config {
         other.indicatorColor == indicatorColor &&
         other.iconColor == iconColor &&
         other.iconColorSelected == iconColorSelected &&
-        other.progressIndicatorColor == progressIndicatorColor &&
         other.backspaceColor == backspaceColor &&
         other.skinToneDialogBgColor == skinToneDialogBgColor &&
         other.skinToneIndicatorColor == skinToneIndicatorColor &&
         other.enableSkinTones == enableSkinTones &&
-        other.showRecentsTab == showRecentsTab &&
+        other.recentTabBehavior == recentTabBehavior &&
         other.recentsLimit == recentsLimit &&
-        other.noRecentsText == noRecentsText &&
-        other.noRecentsStyle == noRecentsStyle &&
+        other.noRecents == noRecents &&
+        other.loadingIndicator == loadingIndicator &&
         other.tabIndicatorAnimDuration == tabIndicatorAnimDuration &&
         other.categoryIcons == categoryIcons &&
-        other.buttonMode == buttonMode;
+        other.buttonMode == buttonMode &&
+        other.gridPadding == gridPadding &&
+        other.replaceEmojiOnLimitExceed == replaceEmojiOnLimitExceed &&
+        other.checkPlatformCompatibility == checkPlatformCompatibility &&
+        other.emojiSet == emojiSet &&
+        other.emojiTextStyle == emojiTextStyle;
   }
 
   @override
@@ -171,16 +199,20 @@ class Config {
       indicatorColor.hashCode ^
       iconColor.hashCode ^
       iconColorSelected.hashCode ^
-      progressIndicatorColor.hashCode ^
       backspaceColor.hashCode ^
       skinToneDialogBgColor.hashCode ^
       skinToneIndicatorColor.hashCode ^
       enableSkinTones.hashCode ^
-      showRecentsTab.hashCode ^
+      recentTabBehavior.hashCode ^
       recentsLimit.hashCode ^
-      noRecentsText.hashCode ^
-      noRecentsStyle.hashCode ^
+      noRecents.hashCode ^
+      loadingIndicator.hashCode ^
       tabIndicatorAnimDuration.hashCode ^
       categoryIcons.hashCode ^
-      buttonMode.hashCode;
+      buttonMode.hashCode ^
+      gridPadding.hashCode ^
+      replaceEmojiOnLimitExceed.hashCode ^
+      checkPlatformCompatibility.hashCode ^
+      (emojiSet?.hashCode ?? 0) ^
+      (emojiTextStyle?.hashCode ?? 0);
 }

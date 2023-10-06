@@ -1,3 +1,56 @@
+## 1.6.1
+- Fix issue with RecentsLimit not working
+- Add example for dynamic emoji columns based on screen width (thx to @timmaffett)
+
+## 1.6.0
+- Breaking Change: Fix behavior of recent tab, choose behavior (None, Recent, Popular) with `recentTabBehavior`. `showRecentsTab` was removed.
+- Fix typo in ReadMe (thx @nathanbacon)
+
+## 1.5.4
+- Restore compatibility of older Flutter versions
+
+## 1.5.3
+- Add Unicode 14 Emoji 🫡
+
+## 1.5.2
+- Fix issue with hiding backspace button (set null to hide)
+- Migrate jcenter to mavenCentral (thx @duyjack)
+
+## 1.5.1
+- Update ReadMe and example 📃
+- Add method `clearRecentEmojis` in EmojiPickerUtils to clear the recent Emojis
+
+## 1.5.0
+- Add support for Web Platform
+- Add support for Windows Platform
+- Add support for Linux Platform
+
+## 1.4.1
+- Code cleanup and optimizations in DefaultEmojiPickerView (thx @PankovSerge)
+
+## 1.4.0
+- Add support for custom fonts ✍️ (thx @yendacoder)
+- Refactor to make components reusable and add example for search (thx @yendacoder)
+- Breaking: Remove `progressIndicatorColor` in favor of `loadingIndicator` in Config
+
+## 1.3.1
+- Add direct support for TextEditingController (thx @LostInDarkMath)
+- Fix Koala face position in emoji lists (thx @nathandud)
+
+## 1.3.0
+- Compatibility for Flutter 3 and update dependencies 💙
+- Introduce property `replaceEmojiOnLimitExceed` to replace least used emoji in Recents when the list is full
+- Add property `gridPadding` to make GridView padding configurable 
+- Add same background color of emoji view to background of loading indicator
+- Improvements for usage of custom view
+
+## 1.2.1
+- Compatibility for Flutter 2.10 and update Android and Kotlin versions
+- Add Mate Emoji 🧉
+
+## 1.2.0
+- Breaking Change: `noRecentsText` of type `String` was changed to `noRecents` of type `Widget` and `noRecentsStyle` was removed from `Config`
+
 ## 1.1.2
 - Fix a issue with macos platform 👨‍🔧
 - Close Skin-Tone dialog on several other timings

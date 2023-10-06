@@ -1,21 +1,20 @@
 import 'package:emoji_picker_flutter/src/category_emoji.dart';
 import 'package:emoji_picker_flutter/src/config.dart';
 import 'package:emoji_picker_flutter/src/default_emoji_picker_view.dart';
+import 'package:emoji_picker_flutter/src/default_emoji_set.dart';
 import 'package:emoji_picker_flutter/src/emoji.dart';
 import 'package:emoji_picker_flutter/src/emoji_picker_internal_utils.dart';
 import 'package:emoji_picker_flutter/src/emoji_view_state.dart';
 import 'package:emoji_picker_flutter/src/recent_emoji.dart';
+import 'package:emoji_picker_flutter/src/recent_tab_behavior.dart';
 import 'package:flutter/material.dart';
 
 /// All the possible categories that [Emoji] can be put into
 ///
 /// All [Category] are shown in the category bar
 enum Category {
-  /// Recent emojis
+  /// Recent / Popular emojis
   RECENT,
-
-  /// Custom emojis
-  CUSTOM,
 
   /// Smiley emojis
   SMILEYS,
@@ -49,8 +48,6 @@ extension CategoryExtension on Category {
     switch (this) {
       case Category.RECENT:
         return 'recent';
-      case Category.CUSTOM:
-        return 'custom';
       case Category.SMILEYS:
         return 'smileys';
       case Category.ANIMALS:
@@ -73,6 +70,10 @@ extension CategoryExtension on Category {
 
 /// Enum to alter the keyboard button style
 enum ButtonMode {
+  /// No cell touch effects, uses GestureDetector only. Provides best grid
+  /// scrolling performance
+  NONE,
+
   /// Android button style - gives the button a splash color with ripple effect
   MATERIAL,
 
@@ -80,11 +81,19 @@ enum ButtonMode {
   CUPERTINO
 }
 
+/// Number of skin tone icons
+const kSkinToneCount = 6;
+
 /// Callback function for when emoji is selected
 ///
 /// The function returns the selected [Emoji] as well
 /// as the [Category] from which it originated
-typedef void OnEmojiSelected(Category category, Emoji emoji);
+/// Category can be null in some cases, for example in search results
+typedef void OnEmojiSelected(Category? category, Emoji emoji);
+
+/// Callback from emoji cell to show a skin tone selection overlay
+typedef void OnSkinToneDialogRequested(
+    Emoji emoji, double emojiSize, CategoryEmoji? categoryEmoji, int index);
 
 /// Callback function for backspace button
 typedef void OnBackspacePressed();
@@ -101,9 +110,10 @@ typedef EmojiViewBuilder = Widget Function(Config config, EmojiViewState state);
 /// and allow the user to quickly switch to that [Category]
 class EmojiPicker extends StatefulWidget {
   /// EmojiPicker for flutter
-  EmojiPicker({
+  const EmojiPicker({
     Key? key,
-    required this.onEmojiSelected,
+    this.textEditingController,
+    this.onEmojiSelected,
     this.onBackspacePressed,
     this.config = const Config(),
     this.customWidget,
@@ -112,8 +122,13 @@ class EmojiPicker extends StatefulWidget {
   /// Custom widget
   final EmojiViewBuilder? customWidget;
 
+  /// If you provide the [TextEditingController] that is linked to a
+  /// [TextField] this widget handles inserting and deleting for you
+  /// automatically.
+  final TextEditingController? textEditingController;
+
   /// The function called when the emoji is selected
-  final OnEmojiSelected onEmojiSelected;
+  final OnEmojiSelected? onEmojiSelected;
 
   /// The function called when backspace button is pressed
   final OnBackspacePressed? onBackspacePressed;
@@ -129,7 +144,7 @@ class EmojiPicker extends StatefulWidget {
 class EmojiPickerState extends State<EmojiPicker> {
   final List<CategoryEmoji> _categoryEmoji = List.empty(growable: true);
   List<RecentEmoji> _recentEmoji = List.empty(growable: true);
-  late Future<void> _updateEmojiFuture;
+  late EmojiViewState _state;
 
   // Prevent emojis to be reloaded with every build
   bool _loaded = false;
@@ -138,9 +153,12 @@ class EmojiPickerState extends State<EmojiPicker> {
   final _emojiPickerInternalUtils = EmojiPickerInternalUtils();
 
   /// Update recentEmoji list from outside using EmojiPickerUtils
-  void updateRecentEmoji(List<RecentEmoji> recentEmoji) {
+  void updateRecentEmoji(List<RecentEmoji> recentEmoji,
+      {bool refresh = false}) {
     _recentEmoji = recentEmoji;
-    if (mounted) {
+    _categoryEmoji[0] = _categoryEmoji[0]
+        .copyWith(emoji: _recentEmoji.map((e) => e.emoji).toList());
+    if (mounted && refresh) {
       setState(() {});
     }
   }
@@ -148,7 +166,7 @@ class EmojiPickerState extends State<EmojiPicker> {
   @override
   void initState() {
     super.initState();
-    _updateEmojiFuture = _updateEmojis();
+    _updateEmojis();
   }
 
   @override
@@ -156,7 +174,7 @@ class EmojiPickerState extends State<EmojiPicker> {
     if (oldWidget.config != widget.config) {
       // Config changed - rebuild EmojiPickerView completely
       _loaded = false;
-      _updateEmojiFuture = _updateEmojis();
+      _updateEmojis();
     }
     super.didUpdateWidget(oldWidget);
   }
@@ -164,98 +182,119 @@ class EmojiPickerState extends State<EmojiPicker> {
   @override
   Widget build(BuildContext context) {
     if (!_loaded) {
-      // Load emojis
-      _updateEmojiFuture.then(
-        (value) => WidgetsBinding.instance!.addPostFrameCallback((_) {
-          if (!mounted) return;
-          setState(() {
-            _loaded = true;
-          });
-        }),
-      );
-
-      // Show loading indicator
-      return const Center(child: CircularProgressIndicator());
+      return widget.config.loadingIndicator;
     }
-    if (widget.config.showRecentsTab) {
-      _categoryEmoji[0].emoji = _recentEmoji.map((e) => e.emoji).toList();
-    }
-
-    var state = EmojiViewState(
-      _categoryEmoji,
-      _getOnEmojiListener(),
-      widget.onBackspacePressed,
-    );
-
-    // Build
     return widget.customWidget == null
-        ? DefaultEmojiPickerView(widget.config, state)
-        : widget.customWidget!(widget.config, state);
+        ? DefaultEmojiPickerView(widget.config, _state)
+        : widget.customWidget!(widget.config, _state);
+  }
+
+  void _onBackspacePressed() {
+    if (widget.textEditingController != null) {
+      final controller = widget.textEditingController!;
+
+      final text = controller.value.text;
+      var cursorPosition = controller.selection.base.offset;
+
+      // If cursor is not set, then place it at the end of the textfield
+      if (cursorPosition < 0) {
+        controller.selection = TextSelection(
+          baseOffset: controller.text.length,
+          extentOffset: controller.text.length,
+        );
+        cursorPosition = controller.selection.base.offset;
+      }
+
+      if (cursorPosition >= 0) {
+        final selection = controller.value.selection;
+        final newTextBeforeCursor =
+            selection.textBefore(text).characters.skipLast(1).toString();
+        print(newTextBeforeCursor);
+        controller
+          ..text = newTextBeforeCursor + selection.textAfter(text)
+          ..selection = TextSelection.fromPosition(
+              TextPosition(offset: newTextBeforeCursor.length));
+      }
+    }
+
+    widget.onBackspacePressed?.call();
   }
 
   // Add recent emoji handling to tap listener
   OnEmojiSelected _getOnEmojiListener() {
     return (category, emoji) {
-      if (widget.config.showRecentsTab) {
+      if (widget.config.recentTabBehavior == RecentTabBehavior.POPULAR) {
+        _emojiPickerInternalUtils
+            .addEmojiToPopularUsed(emoji: emoji, config: widget.config)
+            .then((newRecentEmoji) => {
+                  // we don't want to rebuild the widget if user is currently on
+                  // the RECENT tab, it will make emojis jump since sorting
+                  // is based on the use frequency
+                  updateRecentEmoji(newRecentEmoji,
+                      refresh: category != Category.RECENT),
+                });
+      } else if (widget.config.recentTabBehavior == RecentTabBehavior.RECENT) {
         _emojiPickerInternalUtils
             .addEmojiToRecentlyUsed(emoji: emoji, config: widget.config)
             .then((newRecentEmoji) => {
-                  _recentEmoji = newRecentEmoji,
-                  if (category != Category.RECENT && mounted)
-                    setState(() {
-                      // rebuild to update recent emoji tab
-                      // when it is not current tab
-                    })
+                  // we don't want to rebuild the widget if user is currently on
+                  // the RECENT tab, it will make emojis jump since sorting
+                  // is based on the use frequency
+                  updateRecentEmoji(newRecentEmoji,
+                      refresh: category != Category.RECENT),
                 });
       }
-      widget.onEmojiSelected(category, emoji);
+
+      if (widget.textEditingController != null) {
+        // based on https://stackoverflow.com/a/60058972/10975692
+        final controller = widget.textEditingController!;
+        final text = controller.text;
+        final selection = controller.selection;
+        final cursorPosition = controller.selection.base.offset;
+
+        if (cursorPosition < 0) {
+          controller.text += emoji.emoji;
+          widget.onEmojiSelected?.call(category, emoji);
+          return;
+        }
+
+        final newText =
+            text.replaceRange(selection.start, selection.end, emoji.emoji);
+        final emojiLength = emoji.emoji.length;
+        controller
+          ..text = newText
+          ..selection = selection.copyWith(
+            baseOffset: selection.start + emojiLength,
+            extentOffset: selection.start + emojiLength,
+          );
+      }
+
+      widget.onEmojiSelected?.call(category, emoji);
     };
   }
 
-  // Initalize emoji data
+  // Initialize emoji data
   Future<void> _updateEmojis() async {
     _categoryEmoji.clear();
-    if (widget.config.showRecentsTab) {
+    if ([RecentTabBehavior.RECENT, RecentTabBehavior.POPULAR]
+        .contains(widget.config.recentTabBehavior)) {
       _recentEmoji = await _emojiPickerInternalUtils.getRecentEmojis();
       final recentEmojiMap = _recentEmoji.map((e) => e.emoji).toList();
       _categoryEmoji.add(CategoryEmoji(Category.RECENT, recentEmojiMap));
     }
-
-    final availableCategoryEmoji = await _emojiPickerInternalUtils
-        .getAvailableCategoryEmoji(customEmojis: widget.config.customEmojis);
-
-    availableCategoryEmoji.forEach((category, emojis) async {
-      _categoryEmoji.add(
-        CategoryEmoji(
-            category,
-            emojis.entries
-                .map((emoji) {
-                  final type = EmojiTypeExtensions.fromValue(emoji.value);
-                  if (type == null) {
-                    return null;
-                  }
-                  var _emoji = Emoji(emoji.key, type, emoji.value);
-                  // Emoji with skin tone are only in SMILEY & ACTIVITIES category
-                  if (category == Category.SMILEYS ||
-                      category == Category.ACTIVITIES) {
-                    return _updateSkinToneSupport(_emoji);
-                  } else
-                    return _emoji;
-                })
-                .whereType<Emoji>()
-                .toList()),
-      );
-    });
-
-    // Update emoji list version once all categories were cached
-    _emojiPickerInternalUtils.updateEmojiVersion();
-  }
-
-  // Set [hasSkinTone] to true for emoji that support skin tones
-  Emoji _updateSkinToneSupport(Emoji emoji) {
-    if (_emojiPickerInternalUtils.hasSkinTone(emoji)) {
-      return emoji.copyWith(hasSkinTone: true);
+    final data = widget.config.emojiSet ?? defaultEmojiSet;
+    _categoryEmoji.addAll(widget.config.checkPlatformCompatibility
+        ? await _emojiPickerInternalUtils.filterUnsupported(data)
+        : data);
+    _state = EmojiViewState(
+      _categoryEmoji,
+      _getOnEmojiListener(),
+      widget.onBackspacePressed == null ? null : _onBackspacePressed,
+    );
+    if (mounted) {
+      setState(() {
+        _loaded = true;
+      });
     }
-    return emoji;
   }
 }

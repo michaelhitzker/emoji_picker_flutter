@@ -1,8 +1,6 @@
-import 'dart:io';
-
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
+import 'package:flutter/foundation.dart' as foundation;
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   runApp(MyApp());
@@ -18,16 +16,15 @@ class _MyAppState extends State<MyApp> {
   final TextEditingController _controller = TextEditingController();
   bool emojiShowing = false;
 
-  _onEmojiSelected(Emoji emoji) {
-    _controller
-      ..text += emoji.textEmoji
-      ..selection = TextSelection.fromPosition(
-          TextPosition(offset: _controller.text.length));
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
   }
 
   _onBackspacePressed() {
     _controller
-      ..text = _controller.text.characters.skipLast(1).toString()
+      ..text = _controller.text.characters.toString()
       ..selection = TextSelection.fromPosition(
           TextPosition(offset: _controller.text.length));
   }
@@ -42,7 +39,7 @@ class _MyAppState extends State<MyApp> {
         ),
         body: Column(
           children: [
-            Expanded(child: Container()),
+            const Spacer(),
             Container(
                 height: 66.0,
                 color: Colors.blue,
@@ -65,7 +62,7 @@ class _MyAppState extends State<MyApp> {
                     Expanded(
                       child: Padding(
                         padding: const EdgeInsets.symmetric(vertical: 8.0),
-                        child: TextFormField(
+                        child: TextField(
                             controller: _controller,
                             style: const TextStyle(
                                 fontSize: 20.0, color: Colors.black87),
@@ -87,9 +84,8 @@ class _MyAppState extends State<MyApp> {
                     Material(
                       color: Colors.transparent,
                       child: IconButton(
-                          onPressed: () async {
-                            final prefs = await SharedPreferences.getInstance();
-                            await prefs.clear();
+                          onPressed: () {
+                            // send message
                           },
                           icon: const Icon(
                             Icons.send,
@@ -101,44 +97,45 @@ class _MyAppState extends State<MyApp> {
             Offstage(
               offstage: !emojiShowing,
               child: SizedBox(
-                height: 250,
-                child: EmojiPicker(
-                    onEmojiSelected: (Category category, Emoji emoji) {
-                      _onEmojiSelected(emoji);
-                    },
+                  height: 250,
+                  child: EmojiPicker(
+                    textEditingController: _controller,
                     onBackspacePressed: _onBackspacePressed,
                     config: Config(
-                        columns: 7,
-                        // Issue: https://github.com/flutter/flutter/issues/28894
-                        emojiSizeMax: 32 * (Platform.isIOS ? 1.30 : 1.0),
-                        verticalSpacing: 0,
-                        horizontalSpacing: 0,
-                        initCategory: Category.RECENT,
-                        bgColor: const Color(0xFFF2F2F2),
-                        indicatorColor: Colors.blue,
-                        iconColor: Colors.grey,
-                        iconColorSelected: Colors.blue,
-                        progressIndicatorColor: Colors.blue,
-                        backspaceColor: Colors.blue,
-                        skinToneDialogBgColor: Colors.white,
-                        skinToneIndicatorColor: Colors.grey,
-                        enableSkinTones: true,
-                        showRecentsTab: true,
-                        recentsLimit: 28,
-                        noRecentsText: 'No Recents',
-                        noRecentsStyle: const TextStyle(
-                            fontSize: 20, color: Colors.black26),
-                        tabIndicatorAnimDuration: kTabScrollDuration,
-                        categoryIcons: const CategoryIcons(),
-                        buttonMode: ButtonMode.MATERIAL,
-                        customEmojis: Map.fromIterables([
-                          ':homyLol:',
-                          ':kekW:'
-                        ], [
-                          'https://static-cdn.jtvnw.net/emoticons/v1/1840542/1.0',
-                          'https://static-cdn.jtvnw.net/emoticons/v1/305010854/1.0'
-                        ]))),
-              ),
+                      columns: 7,
+                      // Issue: https://github.com/flutter/flutter/issues/28894
+                      emojiSizeMax: 32 *
+                          (foundation.defaultTargetPlatform ==
+                                  TargetPlatform.iOS
+                              ? 1.30
+                              : 1.0),
+                      verticalSpacing: 0,
+                      horizontalSpacing: 0,
+                      gridPadding: EdgeInsets.zero,
+                      initCategory: Category.RECENT,
+                      bgColor: const Color(0xFFF2F2F2),
+                      indicatorColor: Colors.blue,
+                      iconColor: Colors.grey,
+                      iconColorSelected: Colors.blue,
+                      backspaceColor: Colors.blue,
+                      skinToneDialogBgColor: Colors.white,
+                      skinToneIndicatorColor: Colors.grey,
+                      enableSkinTones: true,
+                      recentTabBehavior: RecentTabBehavior.RECENT,
+                      recentsLimit: 28,
+                      replaceEmojiOnLimitExceed: false,
+                      noRecents: const Text(
+                        'No Recents',
+                        style: TextStyle(fontSize: 20, color: Colors.black26),
+                        textAlign: TextAlign.center,
+                      ),
+                      loadingIndicator: const SizedBox.shrink(),
+                      tabIndicatorAnimDuration: kTabScrollDuration,
+                      categoryIcons: const CategoryIcons(),
+                      buttonMode: ButtonMode.MATERIAL,
+                      checkPlatformCompatibility: true,
+                    ),
+                  )),
             ),
           ],
         ),
