@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:flutter/foundation.dart' as foundation;
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+// import 'package:google_fonts/google_fonts.dart';
 
 void main() {
   runApp(MyApp());
@@ -20,8 +20,7 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   final _editKey = GlobalKey();
   final _focusNode = FocusNode();
-  final TextEditingController _controller =
-      EmojiTextEditingController(emojiStyle: GoogleFonts.notoEmoji());
+  final TextEditingController _controller = TextEditingController();
   bool emojiShowing = false;
 
   void _updateTextEditingValue(TextEditingValue value) {
@@ -99,20 +98,18 @@ class _MyAppState extends State<MyApp> {
         body: Column(
           children: [
             const Spacer(),
-            Padding(
-              padding: const EdgeInsets.all(12.0),
-              child: RichText(
-                  textAlign: TextAlign.center,
-                  text: TextSpan(
-                      style:
-                          const TextStyle(color: Colors.black, fontSize: 18.0),
-                      children: EmojiPickerUtils().setEmojiTextStyle(
-                          '⌨ This text demonstrates how you can include '
-                          'custom-font-based emojis 😁 '
-                          'in your static texts 🎉👏',
-                          emojiStyle: GoogleFonts.notoEmoji(
-                              color: Colors.blueAccent)))),
-            ),
+            // Padding(
+            //   padding: const EdgeInsets.all(12.0),
+            //   child: RichText(
+            //       textAlign: TextAlign.center,
+            //       text: TextSpan(
+            //           style:
+            //               const TextStyle(color: Colors.black, fontSize: 18.0),
+            //           children: EmojiPickerUtils().setEmojiTextStyle(
+            //               '⌨ This text demonstrates how you can include '
+            //               'custom-font-based emojis 😁 '
+            //               'in your static texts 🎉👏',))),
+            // ),
             Container(
                 height: 66.0,
                 color: Colors.blue,
@@ -222,7 +219,7 @@ class _MyAppState extends State<MyApp> {
                       categoryIcons: const CategoryIcons(),
                       buttonMode: ButtonMode.MATERIAL,
                       checkPlatformCompatibility: false,
-                      emojiTextStyle: GoogleFonts.notoColorEmoji(),
+                      // emojiTextStyle: GoogleFonts.notoColorEmoji(),
                       // or for single colored Emoji use:
                       // GoogleFonts.notoEmoji(color: Colors.black),
                       // or TextStyle(fontFamily: 'NotoColorEmoji',
