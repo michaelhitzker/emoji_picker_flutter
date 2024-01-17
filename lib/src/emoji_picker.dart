@@ -19,6 +19,9 @@ enum Category {
   /// Smiley emojis
   SMILEYS,
 
+  /// Custom emojis
+  CUSTOM,
+
   /// Animal emojis
   ANIMALS,
 
@@ -48,6 +51,8 @@ extension CategoryExtension on Category {
     switch (this) {
       case Category.RECENT:
         return 'recent';
+      case Category.CUSTOM:
+        return 'custom';
       case Category.SMILEYS:
         return 'smileys';
       case Category.ANIMALS:
@@ -282,7 +287,18 @@ class EmojiPickerState extends State<EmojiPicker> {
       final recentEmojiMap = _recentEmoji.map((e) => e.emoji).toList();
       _categoryEmoji.add(CategoryEmoji(Category.RECENT, recentEmojiMap));
     }
-    final data = widget.config.emojiSet ?? defaultEmojiSet;
+    var data = [...(widget.config.emojiSet ?? defaultEmojiSet)];
+    final customCategory =
+        CategoryEmoji(Category.CUSTOM, widget.config.customEmojis ?? []);
+    if (customCategory.emoji.isNotEmpty) {
+      final recentIndex =
+          data.indexWhere((element) => element.category == Category.RECENT);
+      if (recentIndex < 0) {
+        data.insert(0, customCategory);
+      } else {
+        data.insert(recentIndex + 1, customCategory);
+      }
+    }
     _categoryEmoji.addAll(widget.config.checkPlatformCompatibility
         ? await _emojiPickerInternalUtils.filterUnsupported(data)
         : data);

@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:emoji_picker_flutter/src/triangle_decoration.dart';
 import 'package:flutter/cupertino.dart';
@@ -105,11 +106,22 @@ class EmojiCell extends StatelessWidget {
       fontSize: emojiSize,
       backgroundColor: Colors.transparent,
     );
-    final emojiText = Text(
-      emoji.emoji,
-      textScaleFactor: 1.0,
-      style: textStyle == null ? style : textStyle!.merge(style),
-    );
+
+    Widget emojiWidget;
+    if (emoji.emoji.startsWith('https://')) {
+      emojiWidget = CachedNetworkImage(
+        imageUrl: emoji.emoji,
+        width: 30,
+        height: 30,
+        fit: BoxFit.contain,
+      );
+    } else {
+      emojiWidget = Text(
+        emoji.emoji,
+        textScaleFactor: 1.0,
+        style: textStyle == null ? style : textStyle!.merge(style),
+      );
+    }
 
     return Center(
       child: emoji.hasSkinTone &&
@@ -118,9 +130,9 @@ class EmojiCell extends StatelessWidget {
           ? Container(
               decoration:
                   TriangleDecoration(color: skinToneIndicatorColor, size: 8.0),
-              child: emojiText,
+              child: emojiWidget,
             )
-          : emojiText,
+          : emojiWidget,
     );
   }
 

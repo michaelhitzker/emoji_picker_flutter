@@ -130,6 +130,7 @@ class _MyAppState extends State<MyApp> {
                         style: TextStyle(fontSize: 20, color: Colors.black26),
                         textAlign: TextAlign.center,
                       ),
+                      customEmojis: [Emoji("🦄", "unicorn")],
                       loadingIndicator: const SizedBox.shrink(),
                       tabIndicatorAnimDuration: kTabScrollDuration,
                       categoryIcons: const CategoryIcons(),

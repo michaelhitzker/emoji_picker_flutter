@@ -21,6 +21,9 @@ class _MyAppState extends State<MyApp> {
   OverlayEntry? _overlay;
   final Config _config = const Config(
     buttonMode: ButtonMode.MATERIAL,
+    customEmojis: [
+      Emoji('https://i.giphy.com/media/3og0IAzB7lmOo2q0Ss/giphy.gif', ':hi:')
+    ],
   );
   bool _isSearchFocused = false;
   bool _emojiShowing = false;
@@ -72,7 +75,7 @@ class _MyAppState extends State<MyApp> {
       emojiSize,
       index,
     );
-    Overlay.of(context)?.insert(_overlay!);
+    Overlay.of(context).insert(_overlay!);
   }
 
   void _closeSkinToneDialog() {

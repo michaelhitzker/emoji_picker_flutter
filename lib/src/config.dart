@@ -1,9 +1,6 @@
 import 'dart:math';
 
-import 'package:emoji_picker_flutter/src/category_emoji.dart';
-import 'package:emoji_picker_flutter/src/category_icons.dart';
-import 'package:emoji_picker_flutter/src/emoji_picker.dart';
-import 'package:emoji_picker_flutter/src/recent_tab_behavior.dart';
+import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:flutter/material.dart';
 
 /// Default Widget if no recent is available
@@ -41,6 +38,7 @@ class Config {
     this.buttonMode = ButtonMode.MATERIAL,
     this.checkPlatformCompatibility = true,
     this.emojiSet,
+    this.customEmojis,
     this.emojiTextStyle,
   });
 
@@ -117,6 +115,7 @@ class Config {
 
   /// Custom emojis; if set, overrides default emojis provided by the library
   final List<CategoryEmoji>? emojiSet;
+  final List<Emoji>? customEmojis;
 
   /// Custom emoji text style to apply to emoji characters in the grid
   ///
@@ -137,6 +136,8 @@ class Config {
     switch (category) {
       case Category.RECENT:
         return categoryIcons.recentIcon;
+      case Category.CUSTOM:
+        return categoryIcons.customIcon;
       case Category.SMILEYS:
         return categoryIcons.smileyIcon;
       case Category.ANIMALS:
