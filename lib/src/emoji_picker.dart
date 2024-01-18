@@ -302,6 +302,20 @@ class EmojiPickerState extends State<EmojiPicker> {
     _categoryEmoji.addAll(widget.config.checkPlatformCompatibility
         ? await _emojiPickerInternalUtils.filterUnsupported(data)
         : data);
+    final allEmojis = _categoryEmoji
+        .where((e) => e.category != Category.RECENT)
+        .map((e) => e.emoji)
+        .expand((e) => e)
+        .map((e) => e.name);
+    final recentFiltered =
+        _recentEmoji.where((e) => allEmojis.contains(e.emoji.name)).toList();
+    final containsRecent =
+        _categoryEmoji.where((e) => e.category == Category.RECENT).isNotEmpty;
+    if (containsRecent) {
+      _categoryEmoji.removeWhere((e) => e.category == Category.RECENT);
+      final recentEmojiMap = recentFiltered.map((e) => e.emoji).toList();
+      _categoryEmoji.insert(0, CategoryEmoji(Category.RECENT, recentEmojiMap));
+    }
     _state = EmojiViewState(
       _categoryEmoji,
       _getOnEmojiListener(),
