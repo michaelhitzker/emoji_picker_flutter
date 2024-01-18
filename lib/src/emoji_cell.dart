@@ -115,8 +115,8 @@ class EmojiCell extends StatelessWidget {
     if (emoji.emoji.startsWith('https://')) {
       emojiWidget = CachedNetworkImage(
         imageUrl: emoji.emoji,
-        width: 30,
-        height: 30,
+        width: 42,
+        height: 42,
         fit: BoxFit.contain,
       );
     } else {
@@ -158,7 +158,8 @@ class EmojiCell extends StatelessWidget {
           onLongPressed: onLongPressed,
           child: _buildEmoji(),
         ),
-        if (overlayBuilder != null) overlayBuilder(context, emoji),
+        if (overlayBuilder != null && emoji.isLocked)
+          overlayBuilder(context, emoji),
       ],
     );
   }
