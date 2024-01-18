@@ -40,6 +40,7 @@ class Config {
     this.emojiSet,
     this.customEmojis,
     this.emojiTextStyle,
+    this.lockedItemOverlayBuilder,
   });
 
   /// Number of emojis per row
@@ -115,7 +116,13 @@ class Config {
 
   /// Custom emojis; if set, overrides default emojis provided by the library
   final List<CategoryEmoji>? emojiSet;
+
+  /// Custom emojis; if set, adds column for custom emojis
   final List<Emoji>? customEmojis;
+
+  /// Overlay that is used for locked emojis
+  final Widget Function(BuildContext context, Emoji emoji)?
+      lockedItemOverlayBuilder;
 
   /// Custom emoji text style to apply to emoji characters in the grid
   ///

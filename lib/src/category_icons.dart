@@ -10,7 +10,7 @@ class CategoryIcons {
   /// Constructor
   const CategoryIcons({
     this.recentIcon = Icons.access_time,
-    this.customIcon = Icons.star_rounded,
+    this.customIcon = Icons.auto_awesome,
     this.smileyIcon = Icons.tag_faces,
     this.animalIcon = Icons.pets,
     this.foodIcon = Icons.fastfood,

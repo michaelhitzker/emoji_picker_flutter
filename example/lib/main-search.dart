@@ -19,10 +19,17 @@ class _MyAppState extends State<MyApp> {
   final FocusNode _searchFocusNode = FocusNode();
   List<Emoji> _searchResults = List.empty();
   OverlayEntry? _overlay;
-  final Config _config = const Config(
+  final Config _config = Config(
     buttonMode: ButtonMode.MATERIAL,
+    lockedItemOverlayBuilder: ((context, emoji) {
+      return const Text('L');
+    }),
     customEmojis: [
-      Emoji('https://i.giphy.com/media/3og0IAzB7lmOo2q0Ss/giphy.gif', ':hi:')
+      const Emoji(
+        'https://i.giphy.com/media/3og0IAzB7lmOo2q0Ss/giphy.gif',
+        ':hi:',
+        isLocked: true,
+      )
     ],
   );
   bool _isSearchFocused = false;

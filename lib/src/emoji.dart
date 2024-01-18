@@ -4,7 +4,8 @@ import 'package:flutter/material.dart';
 @immutable
 class Emoji {
   /// Emoji constructor
-  const Emoji(this.emoji, this.name, {this.hasSkinTone = false});
+  const Emoji(this.emoji, this.name,
+      {this.hasSkinTone = false, this.isLocked = false});
 
   /// The unicode string for this emoji
   ///
@@ -16,6 +17,9 @@ class Emoji {
 
   /// Flag if emoji supports multiple skin tones
   final bool hasSkinTone;
+
+  /// Flag if emoji is locked
+  final bool isLocked;
 
   @override
   String toString() {

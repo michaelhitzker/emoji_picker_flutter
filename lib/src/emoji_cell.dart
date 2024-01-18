@@ -20,6 +20,7 @@ class EmojiCell extends StatelessWidget {
     required this.skinToneIndicatorColor,
     this.onSkinToneDialogRequested,
     required this.onEmojiSelected,
+    this.config,
   });
 
   /// Constructor that can retrieve as much information as possible from
@@ -31,11 +32,11 @@ class EmojiCell extends StatelessWidget {
       this.index = 0,
       required this.onEmojiSelected,
       this.onSkinToneDialogRequested,
-      required Config config})
-      : buttonMode = config.buttonMode,
-        enableSkinTones = config.enableSkinTones,
-        textStyle = config.emojiTextStyle,
-        skinToneIndicatorColor = config.skinToneIndicatorColor;
+      required this.config})
+      : buttonMode = config?.buttonMode ?? ButtonMode.NONE,
+        enableSkinTones = config?.enableSkinTones ?? true,
+        textStyle = config?.emojiTextStyle,
+        skinToneIndicatorColor = config?.skinToneIndicatorColor ?? Colors.grey;
 
   /// Emoji to display as the cell content
   final Emoji emoji;
@@ -69,6 +70,9 @@ class EmojiCell extends StatelessWidget {
 
   /// Callback for a single tap on the cell.
   final OnEmojiSelected onEmojiSelected;
+
+  /// Config
+  final Config? config;
 
   /// Build different Button based on ButtonMode
   Widget _buildButtonWidget({
@@ -146,10 +150,16 @@ class EmojiCell extends StatelessWidget {
       onSkinToneDialogRequested?.call(emoji, emojiSize, categoryEmoji, index);
     };
 
-    return _buildButtonWidget(
-      onPressed: onPressed,
-      onLongPressed: onLongPressed,
-      child: _buildEmoji(),
+    final overlayBuilder = config?.lockedItemOverlayBuilder;
+    return Stack(
+      children: [
+        _buildButtonWidget(
+          onPressed: onPressed,
+          onLongPressed: onLongPressed,
+          child: _buildEmoji(),
+        ),
+        if (overlayBuilder != null) overlayBuilder(context, emoji),
+      ],
     );
   }
 }
