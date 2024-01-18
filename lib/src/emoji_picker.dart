@@ -305,15 +305,26 @@ class EmojiPickerState extends State<EmojiPicker> {
     final allEmojis = _categoryEmoji
         .where((e) => e.category != Category.RECENT)
         .map((e) => e.emoji)
-        .expand((e) => e)
-        .map((e) => e.name);
-    final recentFiltered =
-        _recentEmoji.where((e) => allEmojis.contains(e.emoji.name)).toList();
+        .expand((e) => e);
+    final allEmojiNames = allEmojis.map((e) => e.name);
+    final recentFiltered = _recentEmoji
+        .where((e) => allEmojiNames.contains(e.emoji.name))
+        .toList();
     final containsRecent =
         _categoryEmoji.where((e) => e.category == Category.RECENT).isNotEmpty;
     if (containsRecent) {
       _categoryEmoji.removeWhere((e) => e.category == Category.RECENT);
-      final recentEmojiMap = recentFiltered.map((e) => e.emoji).toList();
+      var recentEmojiMap = recentFiltered.map((emoji) {
+        final matching =
+            allEmojis.where((e) => e.name == emoji.emoji.name).toList();
+        var isLocked = false;
+        if (matching.isNotEmpty) {
+          isLocked = matching[0].isLocked;
+        }
+
+        return Emoji(emoji.emoji.emoji, emoji.emoji.name,
+            hasSkinTone: emoji.emoji.hasSkinTone, isLocked: isLocked);
+      }).toList();
       _categoryEmoji.insert(0, CategoryEmoji(Category.RECENT, recentEmojiMap));
     }
     _state = EmojiViewState(
