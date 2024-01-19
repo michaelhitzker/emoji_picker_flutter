@@ -25,7 +25,8 @@ class EmojiPickerInternalUtils {
 
     return category.copyWith(emoji: [
       for (int i = 0; i < available.length; i++)
-        if (available[i]) category.emoji[i]
+        if (available[i] || category.emoji[i].emoji.startsWith('https://'))
+          category.emoji[i]
     ]);
   }
 
